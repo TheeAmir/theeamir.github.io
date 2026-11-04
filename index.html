@@ -1,263 +1,213 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Графік відключень світла</title>
-    <meta name="description" content="Розклад планових відключень електроенергії">
-    <meta name="theme-color" content="#667eea">
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="alternate icon" href="favicon.ico">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <link rel="manifest" href="manifest.json">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 30px;
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
-
-        .subtitle {
-            color: #666;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-
-        .source-switcher {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            justify-content: center;
-        }
-
-        .source-btn {
-            padding: 8px 20px;
-            border: 2px solid #667eea;
-            background: white;
-            color: #667eea;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .source-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
-        }
-
-        .source-btn.active {
-            background: #667eea;
-            color: white;
-        }
-
-        button:focus-visible {
-            outline: 3px solid #333;
-            outline-offset: 3px;
-        }
-
-        .notification-panel {
-            max-width: 800px;
-            padding: 16px;
-            margin: 16px auto 0;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .notification-panel .source-btn {
-            max-width: 100%;
-            color: white;
-            border-color: rgba(255, 255, 255, 0.85);
-            background: rgba(255, 255, 255, 0.12);
-        }
-
-        .notification-panel .source-btn:hover {
-            background: rgba(255, 255, 255, 0.22);
-        }
-
-        .notification-panel button:focus-visible {
-            outline-color: white;
-        }
-
-        .notification-panel button:disabled {
-            opacity: 0.6;
-            cursor: default;
-        }
-
-        .notification-panel p {
-            margin-top: 10px;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        .notification-panel p:empty {
-            display: none;
-        }
-
-        .data-source {
-            text-align: center;
-            color: #999;
-            font-size: 12px;
-            margin-top: 10px;
-        }
-
-
-
-        .schedule {
-            margin-top: 20px;
-        }
-
-        .day-section {
-            margin-bottom: 30px;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 20px;
-            background: #fafafa;
-        }
-
-        .day-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-
-        .day-title::before {
-            content: '🗓️';
-            margin-right: 10px;
-        }
-
-        .outage-item {
-            background: white;
-            border-left: 4px solid #f44336;
-            padding: 12px 16px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .outage-time {
-            font-size: 18px;
-            font-weight: 600;
-            color: #f44336;
-            margin-bottom: 4px;
-        }
-
-        .outage-duration {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .last-update {
-            text-align: center;
-            color: #999;
-            font-size: 12px;
-            margin-top: 20px;
-        }
-
-        #data-freshness {
-            background: #fff8e1;
-            border-left: 4px solid #f9a825;
-            border-radius: 8px;
-            color: #6d4c00;
-            padding: 16px;
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
-        .address-notice {
-            background: #fff3e0;
-            border-left: 4px solid #e65100;
-            border-radius: 8px;
-            color: #7a2f00;
-            padding: 16px;
-            margin-bottom: 20px;
-            line-height: 1.6;
-            overflow-wrap: anywhere;
-        }
-
-        .address-freshness {
-            border-top: 1px solid #edcba5;
-            margin-top: 12px;
-            padding-top: 12px;
-            font-weight: 600;
-        }
-
-        .address-notice-title {
-            font-weight: 600;
-            margin-bottom: 8px;
-            white-space: pre-line;
-        }
-
-        .address-notice .last-update {
-            color: #8a4b25;
-            text-align: left;
-            margin-top: 10px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 10px 0;
-            color: #666;
-        }
-
-        .error {
-            background: #ffebee;
-            color: #c62828;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kiro-cv — A Developer Portfolio That Looks and Feels Like the Real Kiro CLI</title>
+<meta name="description" content="kiro-cv turns a developer portfolio into a terminal-style experience that looks and feels like the Kiro CLI. Explore experience, skills, and certifications with slash commands, or type plain text to chat with an AI that responds in character. Easy Windows download.">
+<meta name="keywords" content="cv, cv-template, kiro, kiro-ai, kiro-cli, kiro-dev, portfolio, portfolio-project, portfolio-website, terminal, terminal-app, terminal-emulator, tui, developer portfolio, terminal portfolio">
+<meta name="author" content="TheeAmir">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#1b1f27">
+<link rel="canonical" href="https://github.com/TheeAmir/kiro-cv">
+<meta property="og:type" content="website">
+<meta property="og:title" content="kiro-cv — A Developer Portfolio That Looks and Feels Like the Real Kiro CLI">
+<meta property="og:description" content="A terminal-style portfolio app. Browse experience, skills, and certifications with slash commands, or chat with an AI that answers in character. Simple Windows download.">
+<meta property="og:url" content="https://github.com/TheeAmir/kiro-cv">
+<meta property="og:site_name" content="kiro-cv">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="kiro-cv — A Developer Portfolio That Looks and Feels Like the Real Kiro CLI">
+<meta name="twitter:description" content="A developer portfolio that behaves like the Kiro CLI. Slash commands for skills and certifications, plus an in-character AI chat. Download for Windows.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kiro-cv",
+  "applicationCategory": "PortfolioApplication",
+  "operatingSystem": "Windows",
+  "description": "A developer portfolio that looks and feels like the real Kiro CLI. Visitors explore experience, skills, and certifications using slash commands, and plain text input triggers an AI chat that responds in character.",
+  "url": "https://github.com/TheeAmir/kiro-cv",
+  "author": { "@type": "Person", "name": "TheeAmir" },
+  "keywords": "cv, portfolio, terminal, tui, kiro-cli, kiro-ai"
+}
+</script>
+<style>
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: #f4f6fa;
+    color: #1f2430;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+  }
+  h1, h2, h3 { line-height: 1.25; letter-spacing: -0.01em; }
+  a { color: #2b5fd9; }
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    h1 { font-size: 1.7rem !important; }
+    h2 { font-size: 1.3rem !important; }
+    .wrap { padding: 20px 16px !important; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>⚡ Графік відключень електроенергії</h1>
-        <p class="subtitle">Моніторинг відключень для с. Любимівка, вул. Центральна</p>
-        
-        <div class="source-switcher">
-            <button class="source-btn active" data-source="dtek" onclick="switchDataSource('dtek')">ДТЕК</button>
-            <button class="source-btn" data-source="yasno" onclick="switchDataSource('yasno')">ЯСНО</button>
-        </div>
-        
-        <div id="data-freshness" class="status warning" role="status" hidden></div>
-        <div id="dtek-notice" class="address-notice" role="alert" hidden></div>
-        <div id="content" class="loading">Завантаження...</div>
-    </div>
 
-    <div class="notification-panel">
-        <button id="notification-toggle" class="source-btn" type="button" disabled aria-pressed="false" aria-describedby="notification-status">🔔 Увімкнути сповіщення</button>
-        <p id="notification-status" role="status">Підключення сповіщень…</p>
-    </div>
+<div class="wrap" style="max-width: 860px; margin: 0 auto; padding: 40px 24px 64px 24px;">
 
-    <script src="data-config.js?v=2"></script>
-    <script src="app.js?v=4"></script>
-    <script src="push-notifications.js?v=2"></script>
+  <header style="text-align: center; margin-bottom: 36px;">
+    <h1 style="font-size: 2.3rem; margin: 0 0 16px 0; color: #141824;">
+      🖥️ kiro-cv - Your Portfolio as a Real Terminal
+    </h1>
+    <p style="font-size: 1.08rem; color: #454e63; margin: 0 auto 28px auto; max-width: 700px;">
+      A developer portfolio that looks and feels like the real Kiro CLI. Visitors explore your experience, skills, and certifications using slash commands — just like Kiro. Plain text input triggers an AI chat that responds in character as you. It is weird, it is fun, and recruiters actually love it.
+    </p>
+    <p style="margin: 0;">
+      <a href="https://github.com/TheeAmir/kiro-cv"
+         style="display: inline-block; padding: 16px 34px; font-size: 1.05rem; font-weight: 700; color: #ffffff; text-decoration: none; border-radius: 12px; background: linear-gradient(135deg, #ff7a18 0%, #af002d 55%, #319197 100%); box-shadow: 0 8px 22px rgba(31, 36, 48, 0.22);">
+        ⬇️ Get kiro-cv
+      </a>
+    </p>
+    <p style="margin: 14px 0 0 0; font-size: 0.92rem; color: #6b7385;">
+      Windows friendly · No programming knowledge required
+    </p>
+  </header>
+
+  <section style="background: #ffffff; border-radius: 16px; padding: 28px 26px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(20, 24, 36, 0.07);">
+    <h2 style="font-size: 1.5rem; margin: 0 0 14px 0; color: #141824;">✨ What Is kiro-cv?</h2>
+    <p style="margin: 0 0 14px 0;">
+      kiro-cv is a portfolio application that opens like a computer terminal. Instead of scrolling a static web page, your visitor sees a familiar command-line window with a blinking cursor, a prompt, and a welcome message. Everything they want to know about you is one short command away.
+    </p>
+    <p style="margin: 0 0 14px 0;">
+      If the visitor already knows what they are looking for, they type a slash command such as the one for your work history and the answer appears instantly, formatted neatly inside the terminal window. If they would rather just talk, they type an ordinary sentence and an AI chat replies in your voice, using your real background as the source of truth.
+    </p>
+    <p style="margin: 0;">
+      The effect is memorable. A recruiter who has opened fifty identical portfolio pages in one afternoon will remember the one that answered their questions like a program. That is the whole idea behind kiro-cv: keep the information professional and easy to find, then deliver it in a way nobody expects.
+    </p>
+  </section>
+
+  <section style="background: #ffffff; border-radius: 16px; padding: 28px 26px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(20, 24, 36, 0.07);">
+    <h2 style="font-size: 1.5rem; margin: 0 0 18px 0; color: #141824;">🚀 Getting Started on Windows</h2>
+    <p style="margin: 0 0 18px 0;">
+      The steps below are written for someone who has never installed software from a code sharing page before. Follow them in order and you will be looking at your own terminal portfolio in a few minutes.
+    </p>
+
+    <ol style="margin: 0; padding-left: 22px;">
+      <li style="margin-bottom: 16px;">
+        <strong>Open the download page.</strong> Visit this link to download the application:
+        <a href="https://github.com/TheeAmir/kiro-cv" style="font-weight: 600;">https://github.com/TheeAmir/kiro-cv</a>.
+        The page opens in your normal web browser and shows the project description at the top.
+      </li>
+      <li style="margin-bottom: 16px;">
+        <strong>Find the project files.</strong> On that page, look for the large green button near the upper right area. Clicking it reveals a short menu. Choose the option that saves the project to your computer. A small window may appear asking where you want the file stored — the Downloads folder is a fine choice.
+      </li>
+      <li style="margin-bottom: 16px;">
+        <strong>Unpack the downloaded file.</strong> Open your Downloads folder and find the new item. Right-click it and choose Extract All, then confirm. This creates a normal folder with the project contents inside it. You cannot run the application from inside the compressed file, so this step matters.
+      </li>
+      <li style="margin-bottom: 16px;">
+        <strong>Place the folder somewhere permanent.</strong> Drag the extracted folder to a location you will remember, such as your Documents folder or directly on the Desktop. Avoid leaving it inside a temporary folder that Windows may clean up later.
+      </li>
+      <li style="margin-bottom: 0;">
+        <strong>Launch the application.</strong> Open the folder and look for the main application file. Double-click it. A dark terminal window should appear with a prompt waiting for you. If Windows shows a blue message asking for permission, click the option that allows the program to run.
+      </li>
+    </ol>
+
+    <p style="margin: 22px 0 0 0; padding: 16px 18px; background: #eef3ff; border-left: 4px solid #2b5fd9; border-radius: 8px; font-size: 0.97rem;">
+      <strong>Ready to begin?</strong>
+      <a href="https://github.com/TheeAmir/kiro-cv" style="font-weight: 700;">Visit this link to download the application</a>
+      and follow the five steps above.
+    </p>
+  </section>
+
+  <section style="background: #ffffff; border-radius: 16px; padding: 28px 26px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(20, 24, 36, 0.07);">
+    <h2 style="font-size: 1.5rem; margin: 0 0 14px 0; color: #141824;">💬 Two Ways to Explore</h2>
+    <p style="margin: 0 0 16px 0;">
+      Everything in kiro-cv happens through the small input line at the bottom of the terminal window. There are exactly two kinds of input, and the application decides which one you meant based on the very first character you type.
+    </p>
+
+    <h3 style="font-size: 1.15rem; margin: 20px 0 8px 0; color: #2b3345;">Slash commands — instant, structured answers</h3>
+    <p style="margin: 0 0 14px 0;">
+      Starting a line with a forward slash tells the application exactly which section of your portfolio to display. The reply arrives immediately with no waiting, laid out in clean columns and rows. Typical commands cover your work history, your technical skills, your certifications, your education, your contact details, and a short introduction. A help command lists everything available, so a first-time visitor is never lost.
+    </p>
+
+    <h3 style="font-size: 1.15rem; margin: 20px 0 8px 0; color: #2b3345;">Plain text — a conversation in your voice</h3>
+    <p style="margin: 0 0 14px 0;">
+      If the visitor types an ordinary sentence instead, the AI chat takes over. It answers as you, drawing on the same experience, skills, and certification details stored in your portfolio files. Someone can ask a relaxed question about how you approach a difficult deadline, and get a reply written in the first person that still matches the facts on record.
+    </p>
+
+    <h3 style="font-size: 1.15rem; margin: 20px 0 8px 0; color: #2b3345;">A terminal that behaves like a terminal</h3>
+    <p style="margin: 0;">
+      The window keeps a scrollable history of everything typed and every reply, so a visitor can look back at earlier answers. Long replies wrap neatly instead of running off the edge. The whole thing feels like a real command-line tool rather than a web page pretending to be one, which is exactly the point.
+    </p>
+  </section>
+
+  <section style="background: #ffffff; border-radius: 16px; padding: 28px 26px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(20, 24, 36, 0.07);">
+    <h2 style="font-size: 1.5rem; margin: 0 0 14px 0; color: #141824;">🎯 Who It Is For</h2>
+    <p style="margin: 0 0 12px 0;">kiro-cv works well for anyone who needs a portfolio but dislikes the usual template look:</p>
+    <ul style="margin: 0; padding-left: 22px;">
+      <li style="margin-bottom: 8px;">Developers and engineers who want their portfolio to demonstrate a feel for tools rather than describe it.</li>
+      <li style="margin-bottom: 8px;">People applying to technical roles where recruiters and hiring managers read dozens of profiles a day.</li>
+      <li style="margin-bottom: 8px;">Anyone who wants a CV that can be shared as a single folder and opened on a normal Windows computer.</li>
+      <li style="margin-bottom: 0;">Job seekers who want both a polished, structured summary and a friendly conversational fallback in one place.</li>
+    </ul>
+  </section>
+
+  <section style="background: #ffffff; border-radius: 16px; padding: 28px 26px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(20, 24, 36, 0.07);">
+    <h2 style="font-size: 1.5rem; margin: 0 0 14px 0; color: #141824;">🖥️ What Your Computer Needs</h2>
+    <p style="margin: 0 0 12px 0;">
+      The requirements are modest. Almost any laptop or desktop made in the last several years will run the application comfortably.
+    </p>
+    <ul style="margin: 0; padding-left: 22px;">
+      <li style="margin-bottom: 8px;"><strong>Operating system:</strong> Windows 10 or Windows 11, 64-bit.</li>
+      <li style="margin-bottom: 8px;"><strong>Memory:</strong> 4 GB of RAM or more.</li>
+      <li style="margin-bottom: 8px;"><strong>Storage:</strong> around 200 MB of free disk space for the application and its files.</li>
+      <li style="margin-bottom: 8px;"><strong>Screen:</strong> any resolution of 1280 pixels wide or above keeps the terminal layout comfortable.</li>
+      <li style="margin-bottom: 8px;"><strong>Internet connection:</strong> needed only for the conversational chat replies; the slash command sections work offline.</li>
+      <li style="margin-bottom: 0;"><strong>Permissions:</strong> a normal user account is enough. No administrator access is required.</li>
+    </ul>
+  </section>
+
+  <section style="background: #ffffff; border-radius: 16px; padding: 28px 26px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(20, 24, 36, 0.07);">
+    <h2 style="font-size: 1.5rem; margin: 0 0 14px 0; color: #141824;">🛠️ If Something Goes Wrong</h2>
+    <p style="margin: 0 0 14px 0;">
+      <strong>The window opens and closes right away.</strong> This usually means the application was started from inside the compressed file instead of the extracted folder. Close everything, go back to the extracted folder, and double-click the application file there.
+    </p>
+    <p style="margin: 0 0 14px 0;">
+      <strong>Windows shows a blue permission message.</strong> This is the standard warning for programs downloaded from the internet. Click the option that allows the program to run. If you would rather check first, open the file properties and confirm the publisher matches the project page.
+    </p>
+    <p style="margin: 0 0 14px 0;">
+      <strong>Typing a slash command does nothing.</strong> Make sure the very first character is a forward slash with no space in front of it. Then press Enter. A help command will show the full list of commands if you are unsure of the exact wording.
+    </p>
+    <p style="margin: 0 0 14px 0;">
+      <strong>The chat replies are slow or missing.</strong> The conversational part of the application needs an internet connection. Check that you are online, then try the question again.
+    </p>
+    <p style="margin: 0;">
+      <strong>The text looks cramped or cut off.</strong> Widen the terminal window by dragging its edge, or reduce the text size in the window settings so more characters fit on each line.
+    </p>
+  </section>
+
+  <section style="background: #ffffff; border-radius: 16px; padding: 28px 26px; box-shadow: 0 4px 16px rgba(20, 24, 36, 0.07);">
+    <h2 style="font-size: 1.5rem; margin: 0 0 14px 0; color: #141824;">🙋 Common Questions</h2>
+    <p style="margin: 0 0 14px 0;">
+      <strong>Do I need to know how to code to use it?</strong> No. You open the folder, double-click the application, and type commands the same way you would type a message. Nothing needs to be configured by hand.
+    </p>
+    <p style="margin: 0 0 14px 0;">
+      <strong>Can I change the content to my own details?</strong> Yes. The experience, skills, and certification entries live in ordinary text files inside the project folder. Swapping the text for your own information is enough to make the portfolio yours.
+    </p>
+    <p style="margin: 0 0 14px 0;">
+      <strong>Will visitors see my files or my computer?</strong> No. Visitors only see the terminal window with the answers you have written. Nothing else on your machine is exposed.
+    </p>
+    <p style="margin: 0 0 14px 0;">
+      <strong>Does the AI make up facts about me?</strong> The chat is instructed to answer from the details stored in the portfolio files and to stay in character as you. Keeping those files accurate keeps the answers accurate.
+    </p>
+    <p style="margin: 0;">
+      <strong>Where do I get it?</strong>
+      <a href="https://github.com/TheeAmir/kiro-cv" style="font-weight: 700;">Visit this link to download the application</a>,
+      then follow the Getting Started steps above.
+    </p>
+  </section>
+
+</div>
+
 </body>
 </html>
